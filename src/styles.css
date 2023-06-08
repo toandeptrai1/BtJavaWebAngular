@@ -1,1 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
+
+.list-group-item{
+  border-style: none !important;
+}
+nav{
+  height:10%;
+}
+.content{
+  height:80% ;
+}
+.footer{
+  height:10%;
+}
+
+

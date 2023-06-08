@@ -1,0 +1,202 @@
+<div class="row">
+  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Quản lý sản phẩm</li>
+    </ol>
+  </nav>
+</div>
+<div class="row">
+  <h2 class="p-0">Quản lý sản phẩm</h2>
+
+  <div class="col-12 d-flex justify-content-between p-0">
+    <button type="button" class="btn btn-sm btn-danger" style="width:150px" data-bs-toggle="modal"
+    data-bs-target="#addModal">Thêm sản phẩm</button>
+
+    <select class="form-select w-25" aria-label="Disabled select example" #selectFind (change)="findByCateID(selectFind.value)">
+      <option selected disabled>Chọn thể loại đồng hồ</option>
+      <option [value]="cate.categoryId" *ngFor="let cate of categories$|async">{{cate.categoryName}}</option>
+
+    </select>
+    <div class="d-flex">
+      <input class="form-control me-2" type="search" placeholder="Search" #search aria-label="Search">
+      <button class="btn btn-outline-success" type="button" (click)="handleSearch(search.value)">Search</button>
+    </div>
+  </div>
+  <h5 class="text-center text-primary mt-3" *ngIf="(apiResponse$|async).data.page.totalElements==0">Không có sản phẩm nào.
+  </h5>
+  <table class="table table-striped " *ngIf="(apiResponse$|async).data.page.totalElements>0">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Hình ảnh</th>
+
+        <th scope="col">Tên sản phẩm</th>
+        <th scope="col">Giá</th>
+        <th scope="col">Loại sản phẩm</th>
+        <th scope="col">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      <tr *ngFor="let product of (apiResponse$|async).data.page.content">
+        <th scope="row">{{ product.productId}}</th>
+        <td><img src="{{product.image}}" alt="" width="50" height="50"></td>
+        <td>{{ product.productName}}</td>
+        <td>{{ product.price}}</td>
+        <td>{{ product.category.categoryName}}</td>
+        <td colspan="2">
+          <a type="button"  href="#editModal{{product.productId}}" class="btn btn-success me-2" data-bs-toggle="modal" (click)="passValueToForm(product)">Sửa</a>
+          <a type="button" href="#deleteModal{{product.productId}}" class="btn btn-danger" data-bs-toggle="modal" >Xóa</a>
+        </td>
+        <!-- editModal -->
+        <div class="modal fade" id="editModal{{product.productId}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Sửa sản phẩm</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form [formGroup]="editForm">
+                  <div class="mb-3">
+
+                    <input type="text" hidden class="form-control" aria-describedby="emailHelp" formControlName="productId" [value]="product.productId">
+
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Tên sản phẩm</label>
+                    <input type="text" class="form-control" aria-describedby="emailHelp" formControlName="productName" [value]="product.productName">
+
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Giá</label>
+                    <input type="text" class="form-control" aria-describedby="emailHelp" formControlName="price" [value]="product.price">
+
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Mô tả</label>
+                    <input type="text" class="form-control" formControlName="desc" [value]="product.desc">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Hình ảnh</label>
+                    <input type="text" formControlName="image" class="form-control" [value]="product.image">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Brand</label>
+                    <input type="text" formControlName="brand" class="form-control" [value]="product.brand">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Loại sản phẩm</label>
+
+                    <select class="form-select" formControlName="category" (change)="handlEditChange(select1.value)" #select1>
+
+                      <option [value]="cate.categoryId" [selected]="cate.categoryId==product.category.categoryId" *ngFor="let cate of categories$|async">{{cate.categoryName}}</option>
+                    </select>
+                  </div>
+
+
+                </form>
+                <pre>{{editForm.value|json}}</pre>
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" (click)="editProduct(editForm.value)" data-bs-dismiss="modal">Sửa</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- deleteModal -->
+        <div class="modal fade" id="deleteModal{{product.productId}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Xác nhận xóa</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+               Bạn có muốn xóa sản phẩm có id={{ product.productId}}({{ product.productName}})
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"data-bs-dismiss="modal" (click)="deleteProduct(product.productId)" >Xóa</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </tr>
+
+  </table>
+</div>
+<div class="row mt-5" style="margin-bottom:100px">
+
+  <nav aria-label="Page navigation example " *ngIf="(apiResponse$|async).data.page.totalElements>0">
+    <ul class="pagination justify-content-center"   *ngIf="(apiResponse$|async) as api">
+      <li class="page-item " [ngClass]="api.data.page.number+1===1?'disabled':''" (click)="goToPage(api.data.page.number-1)" >
+        <a class="page-link"[ngClass]="api.data.page.number+1===1?'disabled':''" >Previous</a>
+      </li>
+      <li class="page-item" [ngClass]="i===api.data.page.number?'active':''" *ngFor="let pageNumber of [].constructor(api.data.page.totalPages),let i=index" (click)="goToPage(i)"><a class="page-link" >{{i+1}}</a></li>
+
+      <li class="page-item"   [ngClass]="api.data.page.number+1===api.data.page.totalPages?'disabled':''" >
+        <a class="page-link"  [ngClass]="api.data.page.number+1===api.data.page.totalPages?'disabled':''"  (click)="goToPage(api.data.page.number+1)">Next</a>
+      </li>
+    </ul>
+  </nav>
+
+</div>
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm sản phẩm</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="addForm">
+          <div class="mb-3">
+            <label class="form-label">Tên sản phẩm</label>
+            <input type="text" class="form-control" aria-describedby="emailHelp" formControlName="productName">
+
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Giá</label>
+            <input type="text" class="form-control" aria-describedby="emailHelp" formControlName="price">
+
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <input type="text" class="form-control" formControlName="desc">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Hình ảnh</label>
+            <input type="text" formControlName="image" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Brand</label>
+            <input type="text" formControlName="brand" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Loại sản phẩm</label>
+
+            <select class="form-select" formControlName="category" (change)="handleChange(select.value)" #select>
+
+              <option [value]="cate.categoryId" *ngFor="let cate of categories$|async">{{cate.categoryName}}</option>
+            </select>
+          </div>
+
+
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="addProduct(addForm.value)" data-bs-dismiss="modal">Thêm sản phẩm</button>
+      </div>
+    </div>
+  </div>
+</div>

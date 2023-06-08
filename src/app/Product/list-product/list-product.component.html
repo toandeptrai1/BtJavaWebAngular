@@ -1,0 +1,39 @@
+<div class="row">
+  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Danh sách sản phẩm</li>
+    </ol>
+  </nav>
+</div>
+<h3 class="text-center" *ngIf="(apiResponse$|async).data.page.totalElements<=0">Không có sản phẩm nào</h3>
+<div class="row" *ngIf="(apiResponse$|async).data.page.content as products">
+  <div class="col-lg-4 col-md-6 col-sm-12 mb-2 " *ngFor="let product of products" (click)="navigateToProDetail(product.productId)">
+    <div class="card">
+      <img src="{{product.image}}" class="object-fit-cover border rounded" height="300px" class="card-img-top" alt="...">
+      <div class="card-body justify-content-center text-center">
+        <h5 class="card-title">{{product.productName}}</h5>
+        <h5 class="card-title">{{product.price}} VNĐ</h5>
+
+      </div>
+    </div>
+
+  </div>
+
+
+</div>
+<div class="row">
+  <nav aria-label="Page navigation example " *ngIf="(apiResponse$|async).data.page.totalElements>0">
+    <ul class="pagination justify-content-center"   *ngIf="(apiResponse$|async) as api">
+      <li class="page-item "  [ngClass]="api.data.page.number+1===1?'disabled':''" >
+        <a class="page-link"[ngClass]="api.data.page.number+1===1?'disabled':''"  (click)="goToPage(api.data.page.number+1)">Previous</a>
+      </li>
+      <li class="page-item" [ngClass]="i===api.data.page.number?'active':''" *ngFor="let pageNumber of [].constructor(api.data.page.totalPages),let i=index" (click)="goToPage(i)"><a class="page-link" >{{i+1}}</a></li>
+
+      <li class="page-item"   [ngClass]="api.data.page.number+1===api.data.page.totalPages?'disabled':''">
+        <a class="page-link"  [ngClass]="api.data.page.number+1===api.data.page.totalPages?'disabled':''" (click)="goToPage(api.data.page.number+1)">Next</a>
+      </li>
+    </ul>
+  </nav>
+
+</div>
